@@ -1,0 +1,11 @@
+{
+    "name": "Vestigial.Ecstoumod.Tests",
+    "references": [
+        "Vestigial.Ecstoumod"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": []
+}

@@ -1,0 +1,14 @@
+{
+    "name": "Vestigial.Ecstoumod.Editor.Tests",
+    "references": [
+        "Vestigial.Ecstoumod.Editor",
+        "Vestigial.Ecstoumod"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}

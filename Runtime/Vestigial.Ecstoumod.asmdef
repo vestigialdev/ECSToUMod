@@ -1,0 +1,16 @@
+{
+    "name": "Vestigial.Ecstoumod",
+    "references": [
+        "Unity.Entities",
+        "Unity.Entities.Hybrid"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
