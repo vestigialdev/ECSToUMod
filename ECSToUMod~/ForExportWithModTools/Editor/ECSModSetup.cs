@@ -10,6 +10,7 @@ using Debug = UnityEngine.Debug;
 
 public class ASMDEFStub {
     public string name;
+    public string[] references;
 }
 
 [InitializeOnLoad]
@@ -45,6 +46,7 @@ static class ECSModSetup {
         //Create Assembly Definition file for ECS folder
         var asmdef = new ASMDEFStub() {
             name = $"{ModName}_ECS",
+            references = new string[]{"Unity.Entities"},
         };
 
         //Convert ASMDEF stub to JSON text representation
