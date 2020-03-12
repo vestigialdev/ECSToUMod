@@ -6,17 +6,17 @@ using System.IO;
 
 public class Startup : MonoBehaviour {
 
-    [MenuItem("Modding/Do setup2")]
-    static void Copy2() {
+    [MenuItem("Tools/ECSToUMod/Do setup")]
+    static void Setup() {
         Debug.Log($"ECSToUMod setting up");
 
         var one = "Packages/com.vestigial.ecstoumod/ECSToUMod~";
         var absolute = Path.GetFullPath(one);
 
-        Debug.Log($"Absolute: { absolute}");
+        //Debug.Log($"Absolute: { absolute}");
 
         try {
-            FileUtil.CopyFileOrDirectory(absolute, "Assets/ECSToUMod");
+            FileUtil.CopyFileOrDirectory(absolute, "Assets/ECSToUModFiles");
             AssetDatabase.Refresh();
         } catch(System.Exception e) {
             Debug.LogError($"Problem copying: {e.Message}");
