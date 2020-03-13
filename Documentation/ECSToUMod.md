@@ -31,6 +31,6 @@ When in play mode, after loading your mods, populate the ECSToUMod.ModHosts stat
 This scans the loaded mods for subtypes of SystemBase to instantiate and update.
 
 # Documentation
-In the __Package Manager__ window, with __DOTS Editor__ selected, you have access to a __View documentation__ link that opens the package documentation for the current release.
+In the __Package Manager__ window, with __ECSToUMod__ selected, you have access to a __View documentation__ link that opens the package documentation for the current release.
 
-This page contains the user manual, the Editor API reference, and the Runtime API reference.
+This page contains the user manual.
