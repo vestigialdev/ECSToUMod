@@ -5,7 +5,7 @@ using UnityEditor;
 
 public class ECSToModGeneral {
 
-    static string PrintMessagesKey = "ECSToUModEditor_DebugMode";
+    static string PrintMessagesKey => $"ECSToUModEditor_DebugMode_{Application.productName}";
 
 
     [MenuItem("Tools/ECSToUMod/Toggle debug messages")]
