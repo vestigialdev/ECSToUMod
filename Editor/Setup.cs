@@ -6,7 +6,7 @@ using System.IO;
 
 public class Setup {
 
-    static string SetupCompleteKey = "ECSToUModEditor_SetupComplete";
+    static string SetupCompleteKey => $"ECSToUModEditor_SetupComplete_{Application.productName}";
 
     [MenuItem("Tools/ECSToUMod/Reinstall")]
     static void Reinstall() {
