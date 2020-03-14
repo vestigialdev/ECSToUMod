@@ -17,12 +17,12 @@ static class ECSModSetup {
     static string ModName => Args.modName;
     static string ECSName => $"{ModName}_ECS";
     static string AsmDefFilename => $"{ECSName}.asmdef";
-    static string DummyCSFilename => "Dummy.cs";
+    static string DummyCSFilename => "ECSToUModDummy.cs";
 
     static string ModDirectoryRelativePath => Args.relativePath;
     static string AsmDefFileRelativePath => $"{ECSDirectoryRelativePath}/{AsmDefFilename}";
     static string AsmDefFileAbsolutePath => System.IO.Path.Combine(ProjectDirAbsolutePath, ECSDirectoryRelativePath, AsmDefFilename);
-    static string AssemblyRefRelativePath => $"{ModDirectoryRelativePath}/{ECSName}Ref.asset";
+    static string AssemblyRefRelativePath => $"{ModDirectoryRelativePath}/{ECSName}_Ref.asset";
 
     static string ProjectDirAbsolutePath => System.IO.Directory.GetParent(Application.dataPath).ToString();
     static string ECSDirectoryRelativePath => System.IO.Path.Combine($"{ModParentDirectoryRelativePath}", $"{ECSName}");
@@ -32,11 +32,12 @@ static class ECSModSetup {
         Args = args;
 
         //Only create ECS functionality when user consents
-        if(!EditorUtility.DisplayDialog("ECS to UMod", $"Set up the mod '{ModName}' for ECS?", "Enable ECS", "Decline")) {
+        if(!EditorUtility.DisplayDialog("ECS to UMod", $"Enable ECS for '{ModName}'?", "Enable ECS", "Decline")) {
             return;
         }
 
-        //Ensure Entities is installed
+        //Ensure Entities is installed?
+        //Not implemented
 
 
         //Create Assembly Definition file for ECS folder
@@ -58,7 +59,9 @@ static class ECSModSetup {
 
         //Make a dummy .cs file in the mod directory to ensure it gets packed as "has scripts"
         System.IO.File.WriteAllText(System.IO.Path.Combine(ProjectDirAbsolutePath, ModDirectoryRelativePath, DummyCSFilename), "");
-
+        
+        //Make a dummy .cs file in the ECS directory so the asmdef gets compiled
+        System.IO.File.WriteAllText(System.IO.Path.Combine(ProjectDirAbsolutePath, ECSDirectoryRelativePath, DummyCSFilename), "");
 
         AssetDatabase.Refresh();
         AssetDatabase.SaveAssets();
@@ -68,7 +71,7 @@ static class ECSModSetup {
         var includeRef = ECSAssemblyToInclude.CreateInstance<ECSAssemblyToInclude>();
         includeRef.ECSAssemblyDefinition = AssetDatabase.LoadAssetAtPath<TextAsset>(AsmDefFileRelativePath);
 
-        AssetDatabase.CreateAsset(includeRef, Args.relativePath + "/ECSAssembnlyRef.asset");
+        AssetDatabase.CreateAsset(includeRef, AssemblyRefRelativePath);
         AssetDatabase.SaveAssets();
     }
 }
