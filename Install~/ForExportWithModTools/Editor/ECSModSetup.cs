@@ -1,12 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UMod;
+﻿using UMod.BuildEngine;
 using UnityEditor;
-using UMod.BuildEngine;
-using UMod.ModTools.Export;
-using System.Diagnostics;
-using Debug = UnityEngine.Debug;
+using UnityEngine;
 
 public class ASMDEFStub {
     public string name;
@@ -42,11 +36,13 @@ static class ECSModSetup {
             return;
         }
 
+        //Ensure Entities is installed
+
 
         //Create Assembly Definition file for ECS folder
         var asmdef = new ASMDEFStub() {
             name = $"{ModName}_ECS",
-            references = new string[]{"Unity.Entities"},
+            references = new string[] { "Unity.Entities" },
         };
 
         //Convert ASMDEF stub to JSON text representation

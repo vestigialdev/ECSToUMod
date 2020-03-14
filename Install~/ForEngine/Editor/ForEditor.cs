@@ -11,14 +11,26 @@ using UnityEditor;
 public partial class ECSToUModEditor {
 
     static string PrintMessagesKey = "ECSToUModEditor_DebugMode";
+    static string SetupCompleteKey = "ECSToUModEditor_SetupComplete";
+
     public static void ToggleMessages() {
-        EditorPrefs.SetBool(PrintMessagesKey,  !EditorPrefs.GetBool(PrintMessagesKey, true));
+        EditorPrefs.SetBool(PrintMessagesKey, !EditorPrefs.GetBool(PrintMessagesKey, true));
         Debug.Log($"ECSToUMod editor debug messages: {EditorPrefs.GetBool(PrintMessagesKey)}");
+    }
+
+    [InitializeOnLoadMethod]
+    static void SetupHowTo() {
+        if(!EditorPrefs.GetBool(SetupCompleteKey, false)) {
+            //Debug.Log("ECSToMod package is imported, but needs one more step:");
+            //Debug.Log("Go to the Tools menu, ECSToUMod, and click Do Setup");
+            //Debug.Log("This will copy over some necessary files from the package into the project");
+            EditorPrefs.SetBool(SetupCompleteKey, true);
+        }
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
     static void AddECSTypesInEditor() {
-        
+
         Print("RuntimeInitializeLoadType.AfterAssembliesLoaded: automatically calling ECSToUModEditor.AddECSTypesInEditor()");
 
         if(null == ECSToUMod.ModHosts) {
@@ -39,7 +51,7 @@ public partial class ECSToUModEditor {
 
         //Iterate mod hosts looking for types to add
         foreach(var host in ECSToUMod.ModHosts) {
-            
+
             if(!host.IsModLoaded) {
                 continue;
             }

@@ -1,12 +1,19 @@
 {
   "name": "com.vestigial.ecstoumod",
   "displayName": "ECSToUMod",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "unity": "2020.1",
-  "description": "Replace this string with your own description of the package. This description appears in the Package Manager window when the user selects this package from the list. \n\nFor best results, use this text to summarize: \n\u25aa What the package does \n\u25aa How it can benefit the user \n\nNote: Special formatting characters are supported, including line breaks ('\\n') and bullets ('\\u25AA').",
+  "description": "What does this package do?\n\u25aa Allows generated ECS code (for example Entities.ForEach, and [GenerateAuthoringComponent]) to be included in UMod mod files\n\u25aa Registers ECS types (IComponentData, etc) found in loaded mods, with the TypeManager, in Editor mode\n\u25aa Scans loaded ModHosts for instances of SystemBase and injects them into the World and update loop\n\u25aaForces you to load mods early enough for the TypeManager to work correctly, in play mode",
   "dependencies": {
     "com.unity.entities": "0.7.0-preview.19"
   },
   "type": "tool",
-  "hideInEditor": false
+  "hideInEditor": false,
+  "samples": [
+    {
+      "displayName": "Usage sample",
+      "description": "How to use ECSToMod",
+      "path": "Samples~/ECSToModExample"
+    }
+  ]
 }

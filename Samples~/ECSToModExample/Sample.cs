@@ -6,14 +6,9 @@ namespace Vestigial.Ecstoumod {
     /// <summary>
     /// How to use ECSToUMod
     /// </summary>
-    /// <remarks>
-    /// There are a couple problems that this package solves
-    /// 
-    /// </remarks>
-    /// 
     public class SampleECSToUModUsage {
 
-        //This attribute causes the static method to run during a certain phase
+        //This [RuntimeInitializeOnLoadMethod] attribute causes the static method to run "automatically" during a certain phase
         //We need to load the mods into memory before RuntimeInitializeLoadType.BeforeSceneLoaded
         //so RuntimeInitializeLoadType.SubsystemRegistration is one option
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

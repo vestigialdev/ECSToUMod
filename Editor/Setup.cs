@@ -4,23 +4,54 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 
-public class Startup : MonoBehaviour {
+public class Setup {
 
-    [MenuItem("Tools/ECSToUMod/Do setup")]
-    static void Setup() {
-        Debug.Log($"ECSToUMod setting up");
+    static string SetupCompleteKey = "ECSToUModEditor_SetupComplete";
 
-        var one = "Packages/com.vestigial.ecstoumod/ECSToUmod~";
-        var absolute = Path.GetFullPath(one);
+    [MenuItem("Tools/ECSToUMod/Reinstall")]
+    static void Reinstall() {
+        EditorPrefs.SetBool(SetupCompleteKey, false);
+        Install();
+    }
 
-        //Debug.Log($"Absolute: { absolute}");
+    [InitializeOnLoadMethod]
+    static void Install() {
+
+        //Don't automatically install if setup has already been completed
+        if(EditorPrefs.GetBool(SetupCompleteKey, false)) {
+            return;
+        }
+
+        Debug.Log($"ECSToUMod Install()");
+
+        var setupPathRelative = "Packages/com.vestigial.ecstoumod/Install~";
+        var installPathAbsolute = Path.GetFullPath(setupPathRelative);
 
         try {
-            FileUtil.CopyFileOrDirectory(absolute, "Assets/ECSToUmodFiles");
+            var destinationPath = "Assets/ECSToUmodFiles";
+            Debug.Log($"Copying files from {installPathAbsolute} to {destinationPath}");
+
+            //Exists?
+            var existingFolder = AssetDatabase.LoadMainAssetAtPath(destinationPath);
+            if(null != existingFolder) {
+                throw new System.Exception($"Can't reinstall if the folder already exists, try deleting {destinationPath} first");
+            }
+
+            //Actually copy the folder
+            FileUtil.CopyFileOrDirectory(installPathAbsolute, destinationPath);
+
+            //ping the new folder
+            var newlyInstalledFolder = AssetDatabase.LoadMainAssetAtPath(destinationPath);
+            EditorGUIUtility.PingObject(newlyInstalledFolder);
+
             AssetDatabase.Refresh();
+            Debug.Log($"ECSToUMod install complete");
+            EditorPrefs.SetBool(SetupCompleteKey, true);
+
         } catch(System.Exception e) {
-            Debug.LogError($"Problem copying: {e.Message}");
-            throw;
+            Debug.LogError($"Problem installing: {e.Message}");
+            return;
         }
+
     }
 }
