@@ -7,45 +7,98 @@ using Unity.Entities;
 using Unity.Jobs;
 using System;
 using UnityEditor;
+using System.Reflection;
+using Unity.Scenes.Editor;
 
 public partial class ECSToUModEditor {
+
+    //See if the TypeManager has been initialized yet 
+    static bool TypeManagerIsInitialized => (bool)typeof(TypeManager).GetField("s_Initialized", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+
+    static string IsWriteGroupEnabledKey = "IsWriteGroupEnabled";
+    static bool IsWriteGroupEnabled => PlayerPrefs.GetInt(IsWriteGroupEnabledKey, 0) != 0;
+
+    [MenuItem("Tools/ECSToUMod/Toggle WriteGroup functionality")]
+    static void ToggleWriteGroupFunctionality() {
+        var newValue = !IsWriteGroupEnabled;
+        PlayerPrefs.SetInt(IsWriteGroupEnabledKey, newValue ? 1 : 0);
+        ECSToModGeneral.Print($"ECSToUMod: WriteGroup functionality is now {newValue}", LogType.Warning);
+    }
+    
+    static void PrintWriteGroupInstructions() {
+        Debug.Log($"Comment out [InitializeOnLoad] on line 12 of TypeDependencyCache.cs");
+        Debug.Log($"Comment out [InitializeOnLoad] on line 13 of AttachToEntityClonerInjection.cs");
+    }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
     static void AddECSTypesInEditor() {
 
-        ECSToModGeneral.Print("RuntimeInitializeLoadType.AfterAssembliesLoaded: automatically calling ECSToUModEditor.AddECSTypesInEditor()");
+        ECSToModGeneral.Print("ECSToUMod: ECSToUModEditor.AddECSTypesInEditor() called automatically by RuntimeInitializeLoadType.AfterAssembliesLoaded");
 
         if(null == ECSToUMod.ModHosts) {
-            throw new Exception($"ECSToMod.ModHosts[] needs to be populated before ECSToUmod.AddECSTypesInEditor() is called automatically via the [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)] attribute");
+            throw new Exception($"ECSToUMod: ECSToUMod.ModHosts[] needs to be populated before ECSToUmod.AddECSTypesInEditor() is called automatically via the [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)] attribute");
         }
 
-        //In editor, TypeManager.Initialize() gets called earlier than usual, by TypeDependencyCache as well as AttachToEntityClonerInjection, before we have any hope of loading mod code
-        //We need to explicitly inject types into the TypeManager using some editor-specific code, so this must be wrapped in the #if UNITY_EDITOR ... #endif processor (or do it in an Editor script)
+        if(IsWriteGroupEnabled) {
+            
+            //Ensure the TypeManager has not been initialized yet
+            if(TypeManagerIsInitialized) {
+                Debug.LogError($"ECSToUMod: WriteGroup functionality is {IsWriteGroupEnabled} but TypeManager has already been initialized. WriteGroups will be ignored!");
+                PrintWriteGroupInstructions();
+            }
 
-        //Create a list of all interfaces that the TypeManager needs to know about
-        List<System.Type> DOTSInterfaces = new List<System.Type> {
+            //TypeManager.Initialize() was interfered with, so we may need to call it manually here
+            //Or maybe not!
+            //TypeManager.Initialize();
+
+        } else {
+
+            //TypeDependencyCache and AttachToEntityClonerInjection both call TypeManager.Initialize() very early, in the Editor
+            //However, using  TypeManager.AddNewComponentTypes(), we can still include loaded mod code 
+            //Note- this way doesn't respect WriteGroup attributes! 
+
+            //Create a list of all interfaces that the TypeManager needs to know about
+            List<System.Type> DOTSInterfaces = new List<System.Type> {
                 typeof(IBufferElementData),
                 typeof(IComponentData),
                 typeof(ISharedComponentData),
                 typeof(IConvertGameObjectToEntity),
             };
 
-        //Iterate mod hosts looking for types to add
-        foreach(var host in ECSToUMod.ModHosts) {
+            //Iterate mod hosts looking for types to add
+            foreach(var host in ECSToUMod.ModHosts) {
 
-            if(!host.IsModLoaded) {
-                continue;
-            }
+                if(!host.IsModLoaded) {
+                    continue;
+                }
 
-            //Find all mod assemblies that reference the Entities namespace
-            foreach(var modAssembly in host.ScriptDomain.Assemblies.Where(assembly => TypeManager.IsAssemblyReferencingEntities(assembly.RawAssembly))) {
+                //Find all mod assemblies that reference the Entities namespace
+                foreach(var modAssembly in host.ScriptDomain.Assemblies.Where(assembly => TypeManager.IsAssemblyReferencingEntities(assembly.RawAssembly))) {
 
-                foreach(var DOTSInterface in DOTSInterfaces) {
-                    //Find all type definitions in the loaded mod code that implement this interface (for example MyComponent: IComponentData) and grab the actual underlying System.Type via .RawType
-                    var subTypes = modAssembly.FindAllSubTypesOf(DOTSInterface).Select(subtype => subtype.RawType);
+                    foreach(var DOTSInterface in DOTSInterfaces) {
+                        //Find all type definitions in the loaded mod code that implement this interface (for example MyComponent: IComponentData) and grab the actual underlying System.Type via .RawType
+                        var subTypes = modAssembly.FindAllSubTypesOf(DOTSInterface).Select(subtype => subtype.RawType);
 
-                    //Add it to the TypeManager using this special editor-only function
-                    TypeManager.AddNewComponentTypes(subTypes.ToArray());
+                        //Add it to the TypeManager using this special editor-only function
+                        TypeManager.AddNewComponentTypes(subTypes.ToArray());
+
+                        if(TypeManagerIsInitialized) {
+                            bool displayInstructions = false;
+                            foreach(var type in subTypes) {
+                                var attribute = type.GetCustomAttribute<WriteGroupAttribute>();
+                                if(null == attribute) {
+                                    continue;
+                                }
+
+                                Debug.LogWarning($"ECSToUMod: Assembly {modAssembly.Name} has a type {type.Name} with the WriteGroup attribute");
+                                displayInstructions = true;
+                            }
+
+                            if(displayInstructions) {
+                                Debug.LogError($"To enable WriteGroup functionality in the editor with UMod, toggle Tools/ECSToUMod/Toggle writegroup functionality");
+                            }
+                        }
+                    }
                 }
             }
         }
