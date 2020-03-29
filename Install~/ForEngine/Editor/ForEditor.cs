@@ -17,17 +17,53 @@ public partial class ECSToUModEditor {
 
     static string IsWriteGroupEnabledKey = "IsWriteGroupEnabled";
     static bool IsWriteGroupEnabled => PlayerPrefs.GetInt(IsWriteGroupEnabledKey, 0) != 0;
+    
+    [MenuItem("Tools/ECSToUMod/Open problematic Unity files for writing")]
+    static void OpenFilesForChange() {
+
+        if(!IsWriteGroupEnabled) {
+            Debug.Log($"Changing the Unity ECS files is for WriteGroup functionality, which is currently {IsWriteGroupEnabled}");
+            return;
+        }
+
+        string path1 = "TypeDependencyCache.cs";
+        string path2 = "CompanionGameObject.cs";
+        var assetPaths = new List<string>();
+
+        foreach(var assetPath in AssetDatabase.GetAllAssetPaths()) {
+            if(assetPath.EndsWith(path1)) {
+                var script = (MonoScript)AssetDatabase.LoadAssetAtPath(assetPath, typeof(MonoScript));
+                if(script != null) {
+                    AssetDatabase.OpenAsset(script, 12, 4);
+                    //break;
+                }
+            }
+            if(assetPath.EndsWith(path2)) {
+                var script = (MonoScript)AssetDatabase.LoadAssetAtPath(assetPath, typeof(MonoScript));
+                if(script != null) {
+                    AssetDatabase.OpenAsset(script, 13, 4);
+                    //break;
+                }
+            }
+        }
+    }
 
     [MenuItem("Tools/ECSToUMod/Toggle WriteGroup functionality")]
     static void ToggleWriteGroupFunctionality() {
         var newValue = !IsWriteGroupEnabled;
         PlayerPrefs.SetInt(IsWriteGroupEnabledKey, newValue ? 1 : 0);
-        ECSToModGeneral.Print($"ECSToUMod: WriteGroup functionality is now {newValue}", LogType.Warning);
+        Debug.LogWarning($"ECSToUMod: WriteGroup functionality is now {newValue}");
     }
-    
+
     static void PrintWriteGroupInstructions() {
-        Debug.Log($"Comment out [InitializeOnLoad] on line 12 of TypeDependencyCache.cs");
-        Debug.Log($"Comment out [InitializeOnLoad] on line 13 of AttachToEntityClonerInjection.cs");
+        Debug.LogWarning($"ECSToUMod: Comment out [InitializeOnLoad] on line 12 of TypeDependencyCache.cs");
+        Debug.LogWarning($"ECSToUMod: Comment out [InitializeOnLoad] on line 13 of AttachToEntityClonerInjection.cs");
+        if(!EditorUtility.DisplayDialog("ECS to UMod", $"Open files to edit in VS?", "Open in text editor", "Decline")) {
+            EditorUtility.DisplayDialog("ECS to UMod", $"At any time, you can use Tools/ECSToUMod/Open files for writing", "Okay");
+            return;
+        }
+
+        OpenFilesForChange();
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
@@ -40,7 +76,7 @@ public partial class ECSToUModEditor {
         }
 
         if(IsWriteGroupEnabled) {
-            
+
             //Ensure the TypeManager has not been initialized yet
             if(TypeManagerIsInitialized) {
                 Debug.LogError($"ECSToUMod: WriteGroup functionality is {IsWriteGroupEnabled} but TypeManager has already been initialized. WriteGroups will be ignored!");
