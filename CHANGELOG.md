@@ -1,4 +1,4 @@
-## [0.7.0] - 2020-04-25
+## [0.7.1] - 2020-04-25
 Remvoed "WriteGroup" mode
 ## [0.5.0] - 2020-03-28
 Auto-open problematic Unity files so [InitializeOnLoad] can be commented out. This is to support WriteGroup functionality
